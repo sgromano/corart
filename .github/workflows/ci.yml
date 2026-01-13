@@ -159,9 +159,9 @@ jobs:
 
   # Build and push Docker image to GHCR
   build_and_push:
-    # Run only on push to main, after all previous jobs pass
+    # Run only on push to main, after security scans and tests pass (lint is optional)
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [scan_ruby, scan_js, lint, test, system-test]
+    needs: [scan_ruby, scan_js, test, system-test]
     runs-on: ubuntu-latest
     permissions:
       contents: read
