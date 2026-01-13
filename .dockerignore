@@ -1,0 +1,52 @@
+# Ignore git
+.git
+.gitignore
+
+# Ignore bundler config
+/.bundle
+
+# Ignore all environment files
+.env*
+
+# Ignore all logfiles and tempfiles
+/log/*
+/tmp/*
+
+# Ignore storage (uploaded files in development and any SQLite databases)
+/storage/*
+
+# Ignore key files for decrypting credentials
+/config/*.key
+
+# Ignore node_modules if present
+/node_modules
+
+# Ignore test files
+/test
+/spec
+
+# Ignore CI/CD config
+/.github
+
+# Ignore Docker files
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Ignore Kamal files
+/.kamal
+
+# Ignore coverage reports
+/coverage
+
+# Ignore IDE and editor configs
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# Ignore documentation
+README.md
+CHANGELOG.md
+LICENSE

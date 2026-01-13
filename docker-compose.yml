@@ -1,0 +1,49 @@
+services:
+  app:
+    build: .
+    image: ghcr.io/sgromano/corart:latest
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: always
+    ports: ["3000:3000"]
+    command: bash -lc "bundle exec rails db:prepare && rm -f tmp/pids/server.pid && bin/rails server -b 0.0.0.0 -p 3000"
+    logging:
+      driver: "json-file"
+      options: { max-size: "50m", max-file: "3" }
+
+  jobs:
+    build: .
+    image: ghcr.io/sgromano/corart:latest
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+      app:
+        condition: service_started
+    restart: always
+    command: bash -lc "bundle exec rails db:prepare && bin/jobs start"
+    logging:
+      driver: "json-file"
+      options: { max-size: "50m", max-file: "3" }
+
+  db:
+    image: postgres:16-alpine
+    volumes: [ "db-data:/var/lib/postgresql/data" ]
+    environment:
+      POSTGRES_USER: rails
+      POSTGRES_PASSWORD: ${APass}
+      POSTGRES_DB: ${DB_NAME:-corart_production}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rails -d ${DB_NAME:-corart_production}"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: always
+    logging:
+      driver: "json-file"
+      options: { max-size: "50m", max-file: "3" }
+
+volumes:
+  db-data:

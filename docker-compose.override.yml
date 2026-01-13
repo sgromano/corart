@@ -1,0 +1,58 @@
+services:
+  app:
+    user: root
+    volumes:
+      - .:/rails
+      - bundle_cache:/usr/local/bundle
+    env_file: .env
+    command: >
+      bash -lc '
+        set -e
+        # one-time build tools if missing (for native extensions)
+        command -v make >/dev/null 2>&1 || {
+          mkdir -p /var/lib/apt/lists/partial
+          apt-get update -qq
+          apt-get install --no-install-recommends -y build-essential libpq-dev libvips
+          rm -rf /var/lib/apt/lists/*
+        }
+        bundle config set without ""
+        bundle config set deployment "false"
+        bundle check || bundle install
+        rm -f tmp/pids/server.pid
+        bin/rails db:prepare
+        exec bin/rails server -b 0.0.0.0 -p 3000
+      '
+
+  jobs:
+    user: root
+    volumes:
+      - .:/rails
+      - bundle_cache:/usr/local/bundle
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      bash -lc '
+        set -e
+        command -v make >/dev/null 2>&1 || {
+          apt-get update -qq
+          apt-get install --no-install-recommends -y build-essential libpq-dev libvips
+          rm -rf /var/lib/apt/lists/*
+        }
+        bundle config set without ""
+        bundle config set deployment "false"
+        bundle check || bundle install
+        bin/rails db:prepare
+        exec bin/jobs start
+      '
+
+  db:
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rails"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  bundle_cache:
