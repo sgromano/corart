@@ -48,9 +48,9 @@ test:
   primary: &primary_test
     <<: *default
     database: corart_test
-    username: <%= ENV.fetch("POSTGRES_USER", "rails") %>
-    password: <%= ENV.fetch("POSTGRES_PASSWORD") { ENV.fetch("APass", "devpassword123") } %>
-    host: <%= ENV.fetch("DB_HOST") { ENV.fetch("CI", false) ? "localhost" : "db" } %>
+    username: <%= ENV.fetch("POSTGRES_USER") { ENV["CI"] ? "postgres" : "rails" } %>
+    password: <%= ENV.fetch("POSTGRES_PASSWORD") { ENV["CI"] ? "postgres" : ENV.fetch("APass", "devpassword123") } %>
+    host: <%= ENV.fetch("DB_HOST") { ENV["CI"] ? "localhost" : "db" } %>
     port: <%= ENV.fetch("DB_PORT", 5432) %>
   cache:
     <<: *primary_test
